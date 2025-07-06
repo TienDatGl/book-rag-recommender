@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.env
+chroma/
+.vscode/
+*.log
+*.DS_Store
+.idea/
+.vscode/
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
