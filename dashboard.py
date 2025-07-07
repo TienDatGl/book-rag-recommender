@@ -12,8 +12,8 @@ from langchain.schema.messages import HumanMessage
 
 load_dotenv()
 
-CHROMA_PATH = 'vector_store/chroma'
-BOOK_PATH = 'data_cleaned/books_with_emotions.csv'
+CHROMA_PATH = './vector_store/chroma'
+BOOK_PATH = './data_cleaned/books_with_emotions.csv'
 
 # --- Load Data ---
 books = pd.read_csv(BOOK_PATH)
@@ -22,7 +22,7 @@ vectorstore = Chroma(persist_directory=CHROMA_PATH, embedding_function=embedding
 books["large_thumbnail"] = books["thumbnail"] + "&fife=w800"
 books["large_thumbnail"] = np.where(
     books["large_thumbnail"].isna(),
-    "images/cover-not-found.png",
+    "./images/cover-not-found.png",
     books["large_thumbnail"],
 )
 
@@ -84,7 +84,7 @@ def retrieve_semantic_recommendations(
         category: str = None,
         tone: str = None,
         initial_top_k: int = 50,
-        final_top_k: int = 16,
+        final_top_k: int = 5,
 ) -> pd.DataFrame:
     # Step 1: Semantic search via vector DB
     recs = vectorstore.similarity_search(query, k=initial_top_k)

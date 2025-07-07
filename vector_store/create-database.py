@@ -9,8 +9,8 @@ import shutil
 
 load_dotenv()
 
-CHROMA_PATH = "vector_store/chroma"
-DATA_PATH = "tdata_cleaned/tagged_description.txt"
+CHROMA_PATH = "../vector_store/chroma"
+DATA_PATH = "../data_cleaned/tagged_description.txt"
 
 
 def main():
