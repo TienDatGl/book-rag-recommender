@@ -28,12 +28,9 @@ books["large_thumbnail"] = np.where(
 
 def format_authors(authors_string):
     authors = authors_string.split(";")
-    if len(authors) == 2:
-        return f"{authors[0]} and {authors[1]}"
-    elif len(authors) > 2:
-        return f"{', '.join(authors[:-1])}, and {authors[-1]}"
-    else:
-        return authors[0]
+    if len(authors) > 1:
+        return ", ".join(authors[:-1]) + " and " + authors[-1]
+    return authors[0]
 
 
 # --- Prompt Builder ---
@@ -71,7 +68,7 @@ def generate_explanations_batch(desc_list, user_query, user_category, user_emoti
     ]
     reasons = []
     for i in tqdm(range(0, len(prompts), batch_size), desc="Generating reasons"):
-        batch = prompts[i:i+batch_size]
+        batch = prompts[i:i + batch_size]
         results = llm.generate(batch)
         for r in results.generations:
             reasons.append(r[0].text.strip())
@@ -89,15 +86,12 @@ def retrieve_semantic_recommendations(
     # Step 1: Semantic search via vector DB
     recs = vectorstore.similarity_search(query, k=initial_top_k)
 
-    # Step 2: Extract ISBNs from the retrieved documents
-    books_list = []
-    for doc in recs:
-        try:
-            isbn_str = doc.page_content.strip('"').split()[0]
-            if isbn_str.isdigit():
-                books_list.append(int(isbn_str))
-        except Exception as e:
-            print(f"Error parsing ISBN from: {doc.page_content[:50]} - {e}")
+    # Step 2: Extract ISBNs efficiently using list comprehension
+    books_list = [
+        int(doc.page_content.split()[0].strip('"'))
+        for doc in recs
+        if doc.page_content.split()[0].strip('"').isdigit()
+    ]
 
     # Step 3: Filter metadata DataFrame by ISBN
     book_recs = books[books["isbn13"].isin(books_list)].copy()
@@ -173,7 +167,6 @@ def show_book_detail(evt: gr.SelectData, book_data: list):
 """
 
 
-
 # --- Gradio UI ---
 categories = ["All"] + sorted(books["simple_categories"].dropna().unique())
 tones = ["All", "Happy", "Surprising", "Angry", "Suspenseful", "Sad"]
@@ -201,7 +194,6 @@ with gr.Blocks(theme=gr.themes.Glass()) as dashboard:
 
     # On book click, show full details
     output.select(fn=show_book_detail, inputs=book_detail_state, outputs=detail_output)
-
 
 if __name__ == "__main__":
     dashboard.launch()
